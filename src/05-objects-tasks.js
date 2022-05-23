@@ -114,36 +114,115 @@ function fromJSON(proto, json) {
  *  For more examples see unit tests.
  */
 
+class CssSelectorBuilder {
+  constructor() {
+    this.selector = '';
+    this.elementAdded = false;
+    this.idAdded = false;
+    this.classAdded = false;
+    this.attributeAdded = false;
+    this.pseudoClassAdded = false;
+    this.pseudoElementAdded = false;
+  }
+
+  stringify() {
+    return this.selector;
+  }
+
+  element(value) {
+    if (this.elementAdded) throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    if (this.idAdded) throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    this.elementAdded = true;
+    this.selector += value;
+    return this;
+  }
+
+  id(value) {
+    if (this.idAdded) throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    if (this.classAdded) throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    if (this.pseudoElementAdded) throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    this.idAdded = true;
+    this.selector += `#${value}`;
+    return this;
+  }
+
+  class(value) {
+    if (this.attrAdded) throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    this.classAdded = true;
+    this.selector += `.${value}`;
+    return this;
+  }
+
+  attr(value) {
+    if (this.pseudoClassAdded) throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    this.attrAdded = true;
+    this.selector += `[${value}]`;
+    return this;
+  }
+
+  pseudoClass(value) {
+    this.pseudoClassAdded = true;
+    if (this.pseudoElementAdded) throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    this.selector += `:${value}`;
+    return this;
+  }
+
+  pseudoElement(value) {
+    if (this.pseudoElementAdded) throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    this.pseudoElementAdded = true;
+    this.selector += `::${value}`;
+    return this;
+  }
+
+  combine(selector1, combinator, selector2) {
+    this.selector = `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+    return this;
+  }
+}
+
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    const builder = new CssSelectorBuilder();
+    builder.element(value);
+    return builder;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    const builder = new CssSelectorBuilder();
+    builder.id(value);
+    return builder;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    const builder = new CssSelectorBuilder();
+    builder.class(value);
+    return builder;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const builder = new CssSelectorBuilder();
+    builder.attr(value);
+    return builder;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const builder = new CssSelectorBuilder();
+    builder.pseudoClass(value);
+    return builder;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    const builder = new CssSelectorBuilder();
+    builder.pseudoElement(value);
+    return builder;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    const builder = new CssSelectorBuilder();
+    builder.combine(selector1, combinator, selector2);
+    return builder;
   },
 };
-
 
 module.exports = {
   Rectangle,
